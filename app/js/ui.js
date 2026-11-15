@@ -35,7 +35,7 @@ export function fmtPct(n, dp = 2) {
 export function fmtCompact(n) {
   if (!Number.isFinite(n)) return '—';
   const a = Math.abs(n);
-  if (a >= 1e7) return `${(n / 1e7).toFixed(a >= 1e10 ? 0 : 2)} Cr`;
+  if (a >= 1e7) return a >= 1e10 ? `${nf(0).format(n / 1e7)} Cr` : `${(n / 1e7).toFixed(2)} Cr`;
   if (a >= 1e5) return `${(n / 1e5).toFixed(2)} L`;
   if (a >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
   return String(Math.round(n));

@@ -14,6 +14,7 @@ import { httpGet } from './lib/http.mjs';
 import { parseFeed, normalizeItems } from './lib/parse.mjs';
 import { buildMatcher, sentiment, impact, titleTokens, isDuplicate } from './lib/match.mjs';
 import { fetchQuotes, fetchHistory, fetchNifty50, fetchEquityList } from './lib/quotes.mjs';
+import { yahooSession, fetchFundamentals } from './lib/fundamentals.mjs';
 import { normalizeConfig } from './lib/config.mjs';
 import { loadDevices, deliverAll } from './lib/notify.mjs';
 import {
@@ -311,6 +312,29 @@ async function main() {
   }
   for (const s of Object.keys(hist)) if (!histSyms.includes(s)) delete hist[s];
 
+  // Company info (profile, valuation, financials, analysts, events): daily per watchlist stock.
+  const fund = (state.fundamentals ||= {});
+  const equities = watchSyms.filter((s) => /\.(NS|BO)$/i.test(s));
+  for (const s of Object.keys(fund)) if (!equities.includes(s)) delete fund[s];
+  if (!args['no-quotes']) {
+    const due = equities
+      .filter((s) => fund[s]?.day !== today && !(fund[s]?.errDay === today && fund[s].errCount >= 3))
+      .sort((a, b) => (fund[a]?.data ? 1 : 0) - (fund[b]?.data ? 1 : 0)); // brand-new stocks first
+    if (due.length) {
+      const sess = await yahooSession();
+      if (!sess) log('! Company info: could not open a Yahoo session (will retry next scan)');
+      else {
+        let done = 0;
+        for (const s of due.slice(0, 12)) {
+          const r = await fetchFundamentals(s, sess);
+          if (r.data) { fund[s] = { day: today, at: now, data: r.data }; done++; }
+          else { const f = (fund[s] ||= {}); f.errCount = f.errDay === today ? (f.errCount || 0) + 1 : 1; f.errDay = today; f.err = r.error; }
+        }
+        log(`• Company info: refreshed ${done} of ${due.length} due`);
+      }
+    }
+  }
+
   // ---------------------------------------------------------------- alerts
   const quiet = isQuiet(config, now);
   const srcName = (id) => {
@@ -390,6 +414,7 @@ async function main() {
   mkdirSync(outHist, { recursive: true });
   for (const f of readdirSync(histDir)) copyFileSync(join(histDir, f), join(outHist, f));
   if (existsSync(symbolsPath)) copyFileSync(symbolsPath, join(args.out, 'symbols.json'));
+  writeJson(join(args.out, 'fundamentals.json'), { v: 1, updatedAt: now, items: Object.fromEntries(Object.entries(fund).filter(([, f]) => f.data).map(([s, f]) => [s, { at: f.at, ...f.data }])) });
 
   const status = {
     v: 1,

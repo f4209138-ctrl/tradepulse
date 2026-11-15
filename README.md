@@ -5,6 +5,8 @@ Indian stock-market news alerts and a light trading dashboard for your phone.
 - **Push alerts** when your watchlist stocks are in the news, NSE posts a filing for them, your keywords appear, a price level is hit, or a stock makes a big move.
 - **Dashboard**: NIFTY / SENSEX / BANK NIFTY and global cues, NIFTY 50 breadth, top gainers and losers, sector moves.
 - **News feed** from Economic Times, Mint, Business Standard, BusinessLine, NDTV Profit, CNBC, Google News, NSE (announcements, board meetings, corporate actions), RBI and SEBI. Each story is tagged with stocks, sentiment and impact.
+- **Add any NSE stock by name**: it gets the same news scanning, filing alerts, price alerts, charts and pivots as the starter list.
+- **Company info** for watchlist stocks: business profile, key people, valuation (market cap, P/E, P/B, EPS, dividend yield), financials (revenue, margins, ROE, debt), ownership, analyst consensus and targets, next results date.
 - **Watchlist** with intraday sparklines and the day's range. Each stock has a page with a chart (1D–1Y, candles and volume), key stats, pivot levels and CPR, price alerts, and its own news.
 - **Tools**: position sizing, risk:reward, pivots, average price, P&L, plus a trade journal (win rate, expectancy, R-multiples, equity curve, CSV export).
 

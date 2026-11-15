@@ -142,7 +142,7 @@ export async function openAddSheet({ onPick, title = 'Add to watchlist', exclude
   const inList = new Set(exclude || (config()?.watchlist || []).map((w) => w.symbol));
   sheet({
     title,
-    body: `<div class="searchbar">${icon('search', 18)}<input class="input" id="s-q" type="search" placeholder="Company, NSE symbol or index" autocomplete="off" enterkeyhint="search"></div>
+    body: `<div class="searchbar">${icon('search', 18)}<input class="input" id="s-q" type="search" placeholder="Type a company name, e.g. Tata Motors" autocomplete="off" enterkeyhint="search"></div>
       <div class="card tight results-list" id="s-res"><div class="empty small">Loading symbol list…</div></div>`,
     async onMount(root, close) {
       const input = $('#s-q', root);
@@ -174,14 +174,15 @@ export async function openAddSheet({ onPick, title = 'Add to watchlist', exclude
         if (!b || b.disabled) return;
         const sym = b.dataset.sym;
         const name = b.dataset.name === 'Use this exact symbol' ? null : b.dataset.name;
-        close();
+        await close();
         if (onPick) return onPick(sym, name);
         try {
           await saveConfig((cfg) => {
             cfg.watchlist ||= [];
             if (!cfg.watchlist.some((w) => w.symbol === sym)) cfg.watchlist.push({ symbol: sym, name, aliases: [] });
           }, `Add ${baseSym(sym)} to watchlist`);
-          toast(`${baseSym(sym)} added · scanning now`);
+          toast(`${baseSym(sym)} added — news, alerts, chart and company info are being set up`, { ms: 5000 });
+          location.hash = `#/s/${encodeURIComponent(sym)}`;
         } catch (err) {
           needGitHub(err);
         }

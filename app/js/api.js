@@ -86,6 +86,20 @@ export async function loadHistory(sym) {
   }
 }
 
+/** Company info for watchlist stocks (refreshed by the scanner once a day). */
+export async function loadFundamentals() {
+  const key = store.status?.updatedAt || 0;
+  if (store.fund && store.fundKey === key) return store.fund;
+  try {
+    const j = await getJson(dataUrl('fundamentals.json'));
+    store.fund = j.items || {};
+    store.fundKey = key;
+  } catch {
+    store.fund = store.fund || {};
+  }
+  return store.fund;
+}
+
 // ---------------------------------------------------------------- GitHub writes
 
 export class NeedsGitHub extends Error {

@@ -1,7 +1,7 @@
 import { store, config, quote } from '../store.js';
 import { $, esc, fmt, fmtSigned, fmtPct, fmtCompact, dir, icon, ago, when, toast, sheet, confirmSheet } from '../ui.js';
 import { baseSym, isEquity, instrumentName, tradingViewUrl, nseUrl, screenerUrl, pivots, pivotBasis } from '../market.js';
-import { loadHistory, saveConfig } from '../api.js';
+import { loadHistory, saveConfig, loadFundamentals } from '../api.js';
 import { createChart } from '../chart.js';
 import { needGitHub } from './watchlist.js';
 
@@ -34,6 +34,7 @@ export function render(el, [sym]) {
     <p class="note" id="sy-chartnote" hidden></p>
     <div class="sec"><h2>Key stats</h2></div>
     <div class="card"><div class="stats" id="sy-stats"></div></div>
+    <div id="sy-fund"></div>
     <div class="sec"><h2>Pivot levels</h2><span class="small muted" id="sy-pvbasis"></span></div>
     <div class="card" id="sy-pivots"></div>
     <div class="sec"><h2>Price alerts</h2><button class="link" id="sy-addalert" type="button">+ Add alert</button></div>
@@ -81,7 +82,20 @@ export function render(el, [sym]) {
     drawChart();
     drawPivots();
   });
+  refreshFund(sym);
   update(el);
+}
+
+function refreshFund(sym) {
+  if (!isEquity(sym)) return;
+  loadFundamentals().then((all) => {
+    if (!st || st.sym !== sym) return;
+    st.fund = all[sym] || null;
+    st.fundLoaded = true;
+    drawFund();
+    const el = st.el;
+    if (quote(sym)) $('#sy-stats', el).innerHTML = statsHtml(quote(sym));
+  });
 }
 
 function legend(i, d) {
@@ -205,26 +219,13 @@ export function update(el) {
   $('#sy-price', el).textContent = q ? fmt(q.price, q.dp ?? 2) : '—';
   const chg = $('#sy-chg', el);
   chg.className = `chg num ${dir(q?.chgPct)}`;
-  chg.textContent = q ? `${fmtSigned(q.chg, q.dp ?? 2)} (${fmtPct(q.chgPct)})` : 'No quote yet — add to watchlist to track it';
+  chg.textContent = q ? `${fmtSigned(q.chg, q.dp ?? 2)} (${fmtPct(q.chgPct)})` : w ? 'Just added — the scanner is fetching price, news and company info (about a minute)' : 'No quote yet — add to watchlist to track it';
   $('#sy-time', el).textContent = q?.time ? `${q.exch || ''} · as of ${when(q.time)}` : '';
   $('#sy-star', el).innerHTML = w ? `${icon('starred', 16)} Watching` : `${icon('star', 16)} Watch`;
   $('#sy-star', el).classList.toggle('primary', !!w);
 
   if (q) {
-    const dp = q.dp ?? 2;
-    const fromHigh = Number.isFinite(q.w52h) && q.w52h ? ((q.price - q.w52h) / q.w52h) * 100 : null;
-    const range52 = q.w52h > q.w52l ? ((q.price - q.w52l) / (q.w52h - q.w52l)) * 100 : null;
-    $('#sy-stats', el).innerHTML = [
-      stat('Prev close', fmt(q.prev, dp)),
-      stat('Day high', fmt(q.high, dp)),
-      stat('Day low', fmt(q.low, dp)),
-      stat('Volume', q.vol ? fmtCompact(q.vol) : '—'),
-      stat('52W high', fmt(q.w52h, dp)),
-      stat('52W low', fmt(q.w52l, dp)),
-      stat('From 52W high', fromHigh != null ? fmtPct(fromHigh) : '—', dir(fromHigh)),
-      stat('52W position', range52 != null ? `${range52.toFixed(0)}%` : '—'),
-      stat('Exchange', esc(q.exch || '—')),
-    ].join('');
+    $('#sy-stats', el).innerHTML = statsHtml(q);
   } else {
     $('#sy-stats', el).innerHTML = '<p class="muted small" style="margin:0">Quotes are fetched for your watchlist, Markets strip and NIFTY 50 stocks.</p>';
   }
@@ -239,6 +240,130 @@ export function update(el) {
   }
   drawChart();
   drawPivots();
+  if (st.fundLoaded && store.fundKey !== store.status?.updatedAt) refreshFund(st.sym);
+  else drawFund();
+}
+
+function statsHtml(q) {
+  const dp = q.dp ?? 2;
+  const fromHigh = Number.isFinite(q.w52h) && q.w52h ? ((q.price - q.w52h) / q.w52h) * 100 : null;
+  const range52 = q.w52h > q.w52l ? ((q.price - q.w52l) / (q.w52h - q.w52l)) * 100 : null;
+  return [
+    stat('Prev close', fmt(q.prev, dp)),
+    stat('Day high', fmt(q.high, dp)),
+    stat('Day low', fmt(q.low, dp)),
+    stat('Volume', q.vol ? fmtCompact(q.vol) : '—'),
+    stat('52W high', fmt(q.w52h, dp)),
+    stat('52W low', fmt(q.w52l, dp)),
+    stat('From 52W high', fromHigh != null ? fmtPct(fromHigh) : '—', dir(fromHigh)),
+    stat('52W position', range52 != null ? `${range52.toFixed(0)}%` : '—'),
+    stat('Exchange', esc(q.exch || '—')),
+    ...dmaStats(q),
+  ].join('');
+}
+
+// ---------------------------------------------------------------- company info
+
+const pct = (x, dp = 1) => (Number.isFinite(x) ? `${(x * 100).toFixed(dp)}%` : '—');
+const num2 = (x, dp = 2) => (Number.isFinite(x) ? fmt(x, dp) : '—');
+const cr = (x) => (Number.isFinite(x) ? `₹${fmtCompact(x)}` : '—');
+const RATING = { strong_buy: ['Strong buy', 'up'], buy: ['Buy', 'up'], hold: ['Hold', 'flat'], underperform: ['Underperform', 'down'], sell: ['Sell', 'down'] };
+
+function dmaStats(q) {
+  const v = st?.fund?.valuation;
+  if (!v) return [];
+  const vs = (avg) => (Number.isFinite(avg) && avg ? ` (${fmtPct(((q.price - avg) / avg) * 100, 1)})` : '');
+  return [
+    stat('Avg volume (3M)', v.avgVolume ? fmtCompact(v.avgVolume) : '—'),
+    stat('50-day avg', `${num2(v.avg50, q.dp ?? 2)}${vs(v.avg50)}`, dir(q.price - v.avg50)),
+    stat('200-day avg', `${num2(v.avg200, q.dp ?? 2)}${vs(v.avg200)}`, dir(q.price - v.avg200)),
+  ];
+}
+
+function drawFund() {
+  const box = st && $('#sy-fund', st.el);
+  if (!box) return;
+  if (!isEquity(st.sym)) { box.innerHTML = ''; return; }
+  const w = (config()?.watchlist || []).some((x) => x.symbol === st.sym);
+  const f = st.fund;
+  if (!f) {
+    box.innerHTML = st.fundLoaded
+      ? `<div class="sec"><h2>Company info</h2></div><div class="card"><p class="muted small" style="margin:0">${w ? 'Company details are being fetched by the scanner — they appear within a few minutes of adding a stock.' : 'Add this stock to your watchlist to see its company profile, valuation, financials, ownership and analyst targets.'}</p></div>`
+      : '';
+    return;
+  }
+  const q = quote(st.sym);
+  const p = f.profile || {}, v = f.valuation || {}, fi = f.financials || {}, o = f.ownership || {}, a = f.analysts || {}, ev = f.events || {};
+  const up = q && Number.isFinite(a.target) ? ((a.target - q.price) / q.price) * 100 : null;
+  const [rLabel, rCls] = RATING[a.rating] || [];
+  const rangePos = Number.isFinite(a.low) && a.high > a.low && q ? Math.min(100, Math.max(0, ((q.price - a.low) / (a.high - a.low)) * 100)) : null;
+  const date = (t) => (t ? new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
+  const site = p.website ? p.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+  box.innerHTML = `
+    <div class="sec"><h2>About the company</h2></div>
+    <div class="card">
+      ${p.industry || p.sector ? `<div class="chips" style="margin-bottom:10px">${p.sector ? `<span class="chip">${esc(p.sector)}</span>` : ''}${p.industry ? `<span class="chip">${esc(p.industry)}</span>` : ''}</div>` : ''}
+      ${p.summary ? `<p id="sy-about" style="margin:0;color:var(--text-2);font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">${esc(p.summary)}</p><button class="link small" id="sy-more" type="button" style="margin-top:6px">Read more</button>` : ''}
+      <div style="margin-top:8px">
+        ${p.employees ? `<div class="kv"><span>Employees</span><b class="num">${p.employees.toLocaleString('en-IN')}</b></div>` : ''}
+        ${p.city ? `<div class="kv"><span>Headquarters</span><b>${esc(p.city)}</b></div>` : ''}
+        ${(p.people || []).map((x) => `<div class="kv"><span>${esc(x.title || '')}</span><b style="text-align:right">${esc(x.name || '')}</b></div>`).join('')}
+        ${p.website ? `<div class="kv"><span>Website</span><a href="${esc(p.website)}" target="_blank" rel="noopener">${esc(site)}</a></div>` : ''}
+      </div>
+    </div>
+    <div class="sec"><h2>Valuation</h2></div>
+    <div class="card"><div class="stats">
+      ${stat('Market cap', cr(v.marketCap))}
+      ${stat('P/E (TTM)', num2(v.pe))}
+      ${stat('Forward P/E', num2(v.forwardPE))}
+      ${stat('Price / Book', num2(v.pb))}
+      ${stat('EPS (TTM)', num2(v.eps))}
+      ${stat('Book value/share', num2(v.bookValue))}
+      ${stat('Dividend yield', pct(v.dividendYield, 2))}
+      ${stat('Dividend/share', Number.isFinite(v.dividendRate) ? `₹${num2(v.dividendRate)}` : '—')}
+      ${stat('Beta', num2(v.beta))}
+      ${stat('EV / EBITDA', num2(v.evToEbitda))}
+    </div></div>
+    <div class="sec"><h2>Financials</h2><span class="small muted">last 12 months</span></div>
+    <div class="card"><div class="stats">
+      ${stat('Revenue', cr(fi.revenue))}
+      ${stat('Revenue growth', pct(fi.revenueGrowth), dir(fi.revenueGrowth))}
+      ${stat('Earnings growth', pct(fi.earningsGrowth), dir(fi.earningsGrowth))}
+      ${stat('Profit margin', pct(fi.profitMargin))}
+      ${stat('Operating margin', pct(fi.operatingMargin))}
+      ${stat('Return on equity', pct(fi.roe))}
+      ${stat('Return on assets', pct(fi.roa))}
+      ${stat('Debt / Equity', Number.isFinite(fi.debtToEquity) ? `${(fi.debtToEquity / 100).toFixed(2)}×` : '—')}
+      ${stat('Total cash', cr(fi.cash))}
+      ${stat('Total debt', cr(fi.debt))}
+      ${stat('Free cash flow', cr(fi.freeCashflow))}
+      ${stat('Current ratio', num2(fi.currentRatio))}
+    </div></div>
+    <div class="sec"><h2>Ownership</h2></div>
+    <div class="card">
+      <div class="kv"><span>Promoters &amp; insiders</span><b class="num">${pct(o.insiders)}</b></div>
+      <div class="kv"><span>Institutions (FII, DII, funds)</span><b class="num">${pct(o.institutions)}</b></div>
+      ${Number.isFinite(o.insiders) && Number.isFinite(o.institutions) ? `<div class="breadth"><i class="a" style="width:${(o.insiders * 100).toFixed(1)}%"></i><i style="width:${(o.institutions * 100).toFixed(1)}%;background:var(--blue)"></i></div><div class="small faint">Green: promoters &amp; insiders · Blue: institutions · Grey: public &amp; others</div>` : ''}
+    </div>
+    <div class="sec"><h2>Analysts</h2>${a.count ? `<span class="small muted">${a.count} analysts</span>` : ''}</div>
+    <div class="card">
+      ${rLabel ? `<div class="row between"><span class="muted">Consensus rating</span><span class="pill ${rCls}" style="font-size:14px">${rLabel}</span></div>` : '<p class="muted small" style="margin:0">No analyst coverage.</p>'}
+      ${Number.isFinite(a.target) ? `<div class="kv" style="margin-top:8px"><span>Average target</span><b class="num">${num2(a.target)}${up != null ? ` <span class="${dir(up)}">(${fmtPct(up, 1)})</span>` : ''}</b></div>
+        <div class="kv"><span>Target range</span><b class="num">${num2(a.low)} – ${num2(a.high)}</b></div>
+        ${rangePos != null ? `<div class="range"><i style="left:calc(${rangePos.toFixed(1)}% - 1px)"></i></div><div class="small faint" style="margin-top:6px">Marker shows today's price inside the low–high target range</div>` : ''}` : ''}
+    </div>
+    <div class="sec"><h2>Upcoming</h2></div>
+    <div class="card">
+      <div class="kv"><span>Next results date</span><b>${ev.earnings && ev.earnings > Date.now() - 86400e3 ? date(ev.earnings) : '—'}</b></div>
+      <div class="kv"><span>Ex-dividend date</span><b>${ev.exDividend ? date(ev.exDividend) : '—'}${ev.exDividend && ev.exDividend < Date.now() ? ' <span class="faint small">(past)</span>' : ''}</b></div>
+      <p class="note">Company data from Yahoo Finance, refreshed daily. Not investment advice — verify with NSE filings.</p>
+    </div>`;
+  $('#sy-more', box)?.addEventListener('click', (e) => {
+    const ab = $('#sy-about', box);
+    const opened = ab.style.webkitLineClamp === 'unset';
+    ab.style.webkitLineClamp = opened ? '4' : 'unset';
+    e.target.textContent = opened ? 'Read more' : 'Show less';
+  });
 }
 
 export function destroy() {
