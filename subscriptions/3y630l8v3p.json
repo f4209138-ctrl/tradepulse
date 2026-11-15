@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "label": "Firefox on Android",
+  "createdAt": "2026-11-15T08:11:26.845Z",
+  "sealed": {
+    "v": 1,
+    "alg": "ECDH-P256/HKDF-SHA256/A256GCM",
+    "epk": "BKfYMYJ-rXnspE2_Sav-KxhxIOlAstpnd5dcCFXwICmlqO-d8l6L1medvKIkruYh8hzP_dlsuxFNBjwFM4-FElc",
+    "iv": "E6xENtq9Ge6ZuVNb",
+    "ct": "fHGgIH7w7hHnx3gfLh1igJiJYNyMczpPmhxZcaVXD0jFTWLD1vMxmU23qJtBj0TfCDdOgutXhw3W7i6dnvrrsWa6SpPXdNaIogNPWBb85FQQgHMRcqCbJadWx6bfbTGZlyk1_hGZSdWNhbwjzQCLeelS9llkaEDIdq-miqX-8-kS98ujhl5yCh5l6CjI5rUq_iQG4D-vjNFlUBhHUljAZxFPAqewrrg8QiNKOLehiGqYTdzcBQEi9YzY2p4wZdt8YEcSyM3eezQJHZUwL55Fmz9D7BFAByPubT7faUTCRFy-OfhzcEf2fWfevVMJW4z5rVEKAj8QTBrcNkx4py1fSwd3Quu6ipUhANXQEmjlw2w3axdVAW6fvsfQY7JfU2ECV0RnWOPpQpy3sAaS_fe5h6QyuPLcsOIhO3PbDcXGnhGKqIEC-VqLtl-KIoP4dVy8LEyrDuJMhOQRuiIZsBrXLtN9hQFvcTVX41kKiER1ODDr2tHLQMxho0Mqz4dxIdNNcR3EDR2WdrDih7bOqeIqhh1V3cyvxZ8WXWy3YQHwESQVrCyeqolnbt_DlEo77mTsP_NlI2Hw8v3ATLPIBMWX0qHc097KSS-1Cqe-DuSxJBVf7R6jAiEFsQEUFMpLPOhz9zkOV5cFbc3vQXxiMDU"
+  }
+}
