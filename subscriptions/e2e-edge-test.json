@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "label": "Chrome on Android",
+  "createdAt": "2026-11-15T05:06:05.742Z",
+  "sealed": {
+    "v": 1,
+    "alg": "ECDH-P256/HKDF-SHA256/A256GCM",
+    "epk": "BFLcn_BZMVwIDycH4mXAq57wlm1jpKsiSq-se3DFasvDIVCdhiY0o0y9pCgUAXadBk5yAUtqi7ek4dPvl5G38Dg",
+    "iv": "BRFWAd7rdC7QDfMI",
+    "ct": "DQzjRXc8xv_tysr96EvBdHAEhJorQeMOxTgR-Q5uhvMGu_4kj2vbvD_RT-k6DXB7QblX6u_m6_nOMsSaIGA5UqUBfoZBxxnKzfRVYxvhy0yhAisgCJMNoqUSHPdUesnPci2qa4n1RhbXqvBwPGIVWL4BBvjqU2WqWQsUOwHHy5YnmcyOnyAkjONNhU-B8JN7YCFtueezPfS2blW59hciV4gUtVOnF4OUJ6GUpMnxH5QqaR_GOYJMHNcsjbcHikYhmthAaqu9hg2Hw88y5NVTx6nuFDGblnyPMV9GO0XIv6_6Xz8nfpD-u4tVjYBKJdibKMZz9X8G0qZxPLrQ5RLttJk0NZpBdZV4rSW5q79Vnv3tzRZdaGvUeO7fXV8SB6hDJgUrgFKqk79_OE4vWmstWVNawrTSnbgsh1UpnBFqbtsMxc3hey4o-sLCjuHc-zhyQNg9nkrprtMhBWH-qGYmXuHuFbOmv-5qE9eMeleaoQiE2HeLpYTyeOWH2X5Yyjmu7B5obIMqkbGp4D1QjJ29DsE3rj40vdmmHUcW4cP-nX7kTrUiwatLtwiIv0InagAFGYwRYOCN4Zq38YZZ2x0DlxlKMKA2laFaRMjKIX2wCzbb9onFwwdxBXX_cCLsSffCWzIrDxieEEyrupkCHmwlGdPy_m2VQHZf6He29bnaRTG20t8JkU9Pxu7s1N3lKCv1AM6pozRM3dBbAnmDjPI7hSK_TLUQIDECG0v-eCalnEL2WRCkco73Z0uI7j6hUuJed2jXqXYugRLDNtdM8QLeBmY1EAph6kL0FULLWvKErRBDdKStqohGqOCF806CR1nrqwKWrpn73_-Kh3y5WN6AY1rr_t50POGdaGhCFUOoN6PRq7b6zc_bJ8QUhaRcVhD4THVH0IBtpA"
+  }
+}
