@@ -226,3 +226,36 @@ export function copyText(text) {
 export function switchHtml(name, checked, label = '') {
   return `<label class="switch"><input type="checkbox" name="${esc(name)}" ${checked ? 'checked' : ''} aria-label="${esc(label || name)}"><span></span></label>`;
 }
+
+// ---------------------------------------------------------------- browser-specific help
+export function browserName() {
+  const ua = navigator.userAgent;
+  if (/Firefox\//.test(ua)) return 'firefox';
+  if (/SamsungBrowser/.test(ua)) return 'samsung';
+  if (/EdgA?\//.test(ua)) return 'edge';
+  if (/OPR\/|Opera/.test(ua)) return 'opera';
+  if (/Chrome\//.test(ua)) return 'chrome';
+  return 'other';
+}
+export const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+/** How to add the app to the home screen in this browser (HTML). */
+export function installSteps() {
+  return {
+    firefox: 'In Firefox tap the <b>⋮</b> menu (bottom-right or top-right) › <b>Add app to Home screen</b> (older versions: <b>Install</b> or <b>Add to Home screen</b>) › <b>Add</b>.',
+    chrome: 'In Chrome tap <b>⋮</b> › <b>Install app</b> (or <b>Add to Home screen</b>).',
+    samsung: 'In Samsung Internet tap <b>≡</b> › <b>Add page to</b> › <b>Home screen</b>.',
+    edge: 'In Edge tap <b>⋯</b> › <b>Add to phone</b> / <b>Add to Home screen</b>.',
+    opera: 'In Opera tap <b>⋮</b> › <b>Add to</b> › <b>Home screen</b>.',
+    other: 'Open your browser menu and choose <b>Add to Home screen</b> (or <b>Install</b>).',
+  }[browserName()];
+}
+
+/** How to un-block notifications for this site in this browser (HTML). */
+export function unblockSteps() {
+  return {
+    firefox: 'Tap the <b>lock icon</b> left of the address › <b>Notifications</b> › Allow — or Firefox <b>⋮</b> › Settings › Site permissions › Notifications. Also check Android Settings › Apps › Firefox › Notifications is on.',
+    chrome: 'Chrome <b>⋮</b> › Settings › Site settings › Notifications › allow this site (or long-press the app icon › App info › Notifications).',
+    samsung: 'Samsung Internet <b>≡</b> › Settings › Sites and downloads › Notifications › allow this site.',
+  }[browserName()] || 'Open your browser\'s site settings and allow notifications for this site.';
+}

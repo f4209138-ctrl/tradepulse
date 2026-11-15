@@ -1,7 +1,7 @@
 // App shell: router, header status, tab bar, polling, service worker.
 
-import { store, on, saveLocal, config } from './store.js';
-import { loadAppConfig, refresh } from './api.js';
+import { store, on, saveLocal, config, ghConnected } from './store.js';
+import { loadAppConfig, refresh, runScan } from './api.js';
 import { $, esc, icon, toast, ago, when, sheet } from './ui.js';
 
 const TABS = [
@@ -146,8 +146,28 @@ function schedulePoll() {
   if (document.hidden) return;
   pollTimer = setTimeout(async () => {
     await refresh();
+    autoScan();
     schedulePoll();
   }, Math.max(15, store.local.refreshSec || 30) * 1000);
+}
+
+/**
+ * Backup for GitHub's scheduler (which can lag or skip runs): if the app is open and the
+ * last scan is over 12 minutes old, start one via the GitHub API (at most every 10 minutes).
+ */
+async function autoScan() {
+  const s = store.status;
+  if (document.hidden || !store.online || !ghConnected() || !s?.updatedAt) return;
+  const now = Date.now();
+  if (now - s.updatedAt < 12 * 60e3 || now - (store.local.lastAutoScan || 0) < 10 * 60e3) return;
+  store.local.lastAutoScan = now;
+  saveLocal();
+  try {
+    await runScan();
+    toast('Data was getting old — started a fresh scan (≈1 min)');
+  } catch (e) {
+    console.warn('auto scan failed', e);
+  }
 }
 
 // ---------------------------------------------------------------- boot
@@ -199,6 +219,7 @@ async function boot() {
   await loadAppConfig();
   route();
   await refresh({ force: true });
+  autoScan();
   if (!store.news && !store.online) toast('Offline — connect to load market data', { error: true });
   schedulePoll();
   // Re-register push if the browser rotated the subscription since last time.

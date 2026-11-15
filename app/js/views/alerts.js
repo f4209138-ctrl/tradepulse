@@ -1,5 +1,5 @@
 import { store, config, saveLocal, ghConnected, quote } from '../store.js';
-import { $, esc, icon, when, toast, toastError, confirmSheet, switchHtml } from '../ui.js';
+import { $, esc, icon, when, toast, toastError, confirmSheet, switchHtml, unblockSteps } from '../ui.js';
 import { baseSym } from '../market.js';
 import { saveConfig, registerDevice, unregisterDevice, runScan } from '../api.js';
 import { pushSupported, permission, currentSubscription, subscribe, deviceEnvelope, showLocalTest } from '../push.js';
@@ -39,9 +39,9 @@ async function pushCard() {
   if (!app.vapidPublicKey || !app.inboxPublicKey) {
     html = `<div class="row">${icon('info')}<div class="grow"><b>Push isn't configured on the server</b><p class="muted small" style="margin:2px 0 0">The repo is missing its VAPID / inbox keys (see README › Setup).</p></div></div>`;
   } else if (!pushSupported()) {
-    html = `<div class="row">${icon('info')}<div class="grow"><b>This browser can't receive push alerts</b><p class="muted small" style="margin:2px 0 0">Open TradePulse in Chrome on Android and install it to your home screen.</p></div></div>`;
+    html = `<div class="row">${icon('info')}<div class="grow"><b>This browser can't receive push alerts</b><p class="muted small" style="margin:2px 0 0">Use an up-to-date Firefox or Chrome on Android, and make sure the page is opened over https.</p></div></div>`;
   } else if (permission() === 'denied') {
-    html = `<div class="row">${icon('bell')}<div class="grow"><b>Notifications are blocked</b><p class="muted small" style="margin:2px 0 0">Chrome ⋮ › Settings › Site settings › Notifications › allow this site (or long-press the app icon › App info › Notifications). Then come back here.</p></div></div>`;
+    html = `<div class="row">${icon('bell')}<div class="grow"><b>Notifications are blocked</b><p class="muted small" style="margin:2px 0 0">${unblockSteps()} Then come back here.</p></div></div>`;
   } else {
     const sub = await currentSubscription().catch(() => null);
     const registered = !!sub && store.local.push?.registered && store.local.push.endpoint === sub.endpoint;

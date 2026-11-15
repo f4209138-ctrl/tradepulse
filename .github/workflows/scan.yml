@@ -4,8 +4,8 @@ name: Scan & deploy
 # sometimes delayed by a few minutes when GitHub is busy.
 on:
   schedule:
-    - cron: '1-59/5 * * * 1-5'   # every 5 min, Mon–Fri (UTC)
-    - cron: '3-59/15 * * * 0,6'  # every 15 min, Sat–Sun
+    - cron: '*/5 * * * 1-5'   # every 5 min, Mon–Fri (UTC)
+    - cron: '*/15 * * * 0,6'  # every 15 min, Sat–Sun
   push:
     branches: [main]
     paths-ignore: ['**.md']

@@ -1,5 +1,5 @@
-import { store, config, quote, ghConnected } from '../store.js';
-import { $, esc, fmt, fmtPct, dir, sparkline, icon, ago, when } from '../ui.js';
+import { store, config, quote, ghConnected, saveLocal } from '../store.js';
+import { $, esc, fmt, fmtPct, dir, sparkline, icon, ago, when, isStandalone, installSteps } from '../ui.js';
 import { nseStatus, usStatus, baseSym } from '../market.js';
 import { pushSupported, permission } from '../push.js';
 
@@ -20,6 +20,12 @@ export function render(el) {
     <div class="sec"><h2>Top stories</h2><a href="#/news">All news ›</a></div>
     <div class="card tight" id="h-news"></div>`;
   el.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-hide-install]')) {
+      store.local.installHidden = true;
+      saveLocal();
+      update(el);
+      return;
+    }
     if (e.target.closest('[data-install]') && store.installPrompt) {
       store.installPrompt.prompt();
       await store.installPrompt.userChoice.catch(() => null);
@@ -36,8 +42,10 @@ function callouts() {
   if (s && Date.now() - s.updatedAt > 45 * 60e3) {
     out.push(`<a class="callout" href="#/help">${icon('info')}<div class="grow"><strong>Scanner hasn't run for ${esc(ago(s.updatedAt))}</strong><p>GitHub may be delaying scheduled runs. Data shown is from ${esc(when(s.updatedAt))}.</p></div></a>`);
   }
-  if (store.installPrompt && !matchMedia('(display-mode: standalone)').matches) {
+  if (store.installPrompt && !isStandalone()) {
     out.push(`<div class="callout">${icon('phone')}<div class="grow"><strong>Install TradePulse</strong><p>Adds it to your home screen like an app — light and fast.</p></div><button class="btn sm primary" data-install type="button">Install</button></div>`);
+  } else if (!isStandalone() && !store.local.installHidden) {
+    out.push(`<div class="callout" style="align-items:flex-start">${icon('phone')}<div class="grow"><strong>Add TradePulse to your home screen</strong><p>${installSteps()}</p></div><button class="icon-btn" data-hide-install type="button" aria-label="Hide">${icon('x', 18)}</button></div>`);
   }
   if (store.app?.vapidPublicKey && pushSupported() && (permission() !== 'granted' || !store.local.push?.registered)) {
     out.push(`<a class="callout" href="#/alerts">${icon('bell')}<div class="grow"><strong>Turn on push alerts</strong><p>Get notified when your stocks are in the news.</p></div>${icon('chev')}</a>`);

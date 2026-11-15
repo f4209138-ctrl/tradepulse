@@ -25,7 +25,7 @@ export async function subscribe(vapidPublicKey) {
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') {
     throw new Error(perm === 'denied'
-      ? 'Notifications are blocked. In Chrome open ⋮ › Settings › Site settings › Notifications and allow this site.'
+      ? 'Notifications are blocked for this site. Allow them in the browser site settings (see the steps on the Alerts screen).'
       : 'Notification permission was not granted.');
   }
   const reg = await navigator.serviceWorker.ready;

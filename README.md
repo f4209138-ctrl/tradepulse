@@ -33,7 +33,7 @@ The phone does no scanning, so it uses very little battery and data. The install
 1. Push this repo to GitHub as a **public** repo. Free Actions minutes and Pages need a public repo.
 2. Run `node tools/setup.mjs` with the GitHub CLI logged in. It creates the push keys, stores them as secrets and variables, and enables Pages.
 3. Run the workflow once: Actions › Scan & deploy › Run workflow. The app goes live at `https://<user>.github.io/<repo>/`.
-4. On your phone, open that URL in Chrome and use ⋮ › **Install app**.
+4. On your phone, open that URL in **Firefox** (⋮ › **Add app to Home screen**) or Chrome (⋮ › **Install app**). Both support push alerts.
 5. In the app, go to More › Settings › **Create token**. GitHub opens with the token form already filled in. Under **Repository access** choose *Only select repositories* › this repo, then generate the token, copy it, paste it into the app and tap **Connect**.
 6. Go to the Alerts tab › **Turn on push alerts**. A test notification arrives in about a minute.
 
