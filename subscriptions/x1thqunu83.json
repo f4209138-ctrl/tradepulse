@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "label": "Chrome on Android",
+  "createdAt": "2026-11-15T08:14:50.541Z",
+  "sealed": {
+    "v": 1,
+    "alg": "ECDH-P256/HKDF-SHA256/A256GCM",
+    "epk": "BPbV5mT1qLJ-5xSDAJtVTfMp5L0Tynu2CvKcpCQBvOEMe3OsvnNWYi5JNVFVuR1qGxqftDucnomw83wOcr2d-aU",
+    "iv": "Zkj8NWjPpqWWL3bl",
+    "ct": "I-Ax2vbKszVTlegW5DyC8XmbXiaQjey0aI3NVB2dDPjf9Xk1X5AAlPaikkTA-hL1jnh_necitreO7ly89osMeZRQamZndZtJMyFvrwvLhGsIFTTpRdXH_vXA8HhHU1d__jAVwVstq8JvgKd_ULv7VHWxU4iQMo1J130vGXwfRUqwmKcWXY6X9ZuHKjdx-ty-PhBgH3_DTdmHMxVWeOII0yrirU1FJwFoJWt2Q285R3gYBCAOrxb2mpqe8Hm8K8Z2E7ZoWP-tWt7eZhmyUOU808BdMgtIKftViOTS45_38DwgJu_olpR4w-6weSggv5w2wuM2nqf858CjDsLyqgwM5JLM-F2s8U-yjfjuqURHzVigC7RRTcm-MPTPVCU75vBn0IattBm_nlTQ3j9sfWsyq5y2GOe2V9tVRE6Gl23G7wK-lYm-P3YU6eveUJzEt8XyQFnXKq34DMYmNo3ReFLScSzs8EmXO14Lg0zUW8wZb3mR9AahX7437itDFTG7vPGzIRca5A0vAxvKGigVzdDD6IXtLHtFfZ6hjJhPbWU5Jkdva9k8UFVkXkzfPdCdu0TQ30nSc1N_JYvLaDJERF0-SA"
+  }
+}
