@@ -1,0 +1,44 @@
+name: Scan timer
+
+# A self-repeating timer that starts a scan every ~5 minutes (every 15 at weekends).
+# GitHub's own cron scheduler is unreliable for this repo, so each tick waits on the
+# "scan-timer" environment's 4-minute wait timer (no runner is used while waiting),
+# starts a scan, then queues the next tick. Every scan also restarts the timer if it
+# has stopped, and the cron below is one more safety net.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+
+permissions:
+  actions: write
+
+concurrency:
+  group: scan-timer
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: scan-timer
+    steps:
+      - name: Start a scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dow=$(date -u +%u)
+          min=$(date -u +%M)
+          # Weekdays: every tick. Weekends: roughly every 15 minutes.
+          if [ "$dow" -le 5 ] || [ $((10#$min % 15)) -lt 5 ]; then
+            gh workflow run scan.yml --repo "$GITHUB_REPOSITORY"
+            echo "Scan started"
+          else
+            echo "Weekend: skipping this tick"
+          fi
+
+      - name: Queue the next tick
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run tick.yml --repo "$GITHUB_REPOSITORY"

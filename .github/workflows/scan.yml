@@ -95,3 +95,18 @@ jobs:
 
       - id: deploy
         uses: actions/deploy-pages@v5
+
+      - name: Keep the scan timer running
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          active=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow tick.yml --limit 10 --json status \
+            --jq '[.[] | select(.status != "completed")] | length')
+          if [ "${active:-0}" -eq 0 ]; then
+            gh workflow run tick.yml --repo "$GITHUB_REPOSITORY"
+            echo "Scan timer was not running: restarted"
+          else
+            echo "Scan timer is running"
+          fi

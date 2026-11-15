@@ -56,16 +56,6 @@ function pagesUrl() {
   return repo.toLowerCase() === host ? `https://${host}/` : `https://${host}/${repo}/`;
 }
 
-// Next scheduled run per the workflow crons (UTC): weekdays every 5 min, weekends every 15 min.
-function nextScheduledRun(now) {
-  for (let t = Math.ceil((now + 1) / 60000) * 60000; t < now + 2 * 3600e3; t += 60000) {
-    const d = new Date(t);
-    const dow = d.getUTCDay();
-    const m = d.getUTCMinutes();
-    if (dow >= 1 && dow <= 5 ? m % 5 === 0 : m % 15 === 0) return t;
-  }
-  return null;
-}
 
 async function githubApi(method, path, body) {
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPOSITORY) return null;
@@ -422,7 +412,7 @@ async function main() {
     durationMs: Date.now() - now,
     trigger: env.GITHUB_EVENT_NAME || 'local',
     runUrl: env.GITHUB_RUN_ID ? `${env.GITHUB_SERVER_URL || 'https://github.com'}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` : null,
-    nextRunAt: nextScheduledRun(now),
+    nextRunAt: [0, 6].includes(new Date(now).getUTCDay()) ? now + 15 * 60e3 : now + 5.5 * 60e3, // scan timer cadence
     bootstrap,
     quiet,
     counts: { items: items.length, fresh: newItems.length, alerts: payloads.length },
