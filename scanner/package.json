@@ -1,0 +1,16 @@
+{
+  "name": "tradepulse-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scans Indian market news feeds and quotes, then sends push alerts. Runs on GitHub Actions.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "scan": "node scan.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.12.1",
+    "web-push": "^4.0.0"
+  }
+}

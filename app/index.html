@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TradePulse</title>
+  <meta name="description" content="Indian stock market news alerts, watchlist and trading tools.">
+  <meta name="theme-color" content="#0a0e14">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    // Apply the saved theme before first paint (no flash).
+    try {
+      var t = (JSON.parse(localStorage.getItem('tp:v1') || '{}').theme) || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      if (t === 'light' || (t === 'system' && matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.querySelector('meta[name=theme-color]').setAttribute('content', '#f3f5f8');
+      }
+    } catch (e) {}
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header id="top">
+    <button class="icon-btn back" id="back" hidden aria-label="Back"></button>
+    <h1 id="title">TradePulse</h1>
+    <button class="status-pill" id="scan-status" aria-label="Scanner status"><i class="status-dot"></i><span>Loading…</span></button>
+    <button class="icon-btn" id="refresh" aria-label="Refresh"></button>
+  </header>
+  <main id="view" class="view">
+    <div class="card"><div class="skeleton" style="width:60%"></div><div class="skeleton"></div><div class="skeleton" style="width:80%"></div></div>
+  </main>
+  <nav id="tabs" aria-label="Sections"></nav>
+  <noscript><p style="padding:16px">TradePulse needs JavaScript.</p></noscript>
+</body>
+</html>

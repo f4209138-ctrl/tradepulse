@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "market": "IN",
+  "timezone": "Asia/Kolkata",
+  "watchlist": [
+    {
+      "symbol": "RELIANCE.NS",
+      "name": "Reliance Industries Limited",
+      "aliases": [
+        "Reliance Industries",
+        "RIL",
+        "Jio Platforms",
+        "Reliance Retail"
+      ]
+    },
+    {
+      "symbol": "HDFCBANK.NS",
+      "name": "HDFC Bank Limited",
+      "aliases": [
+        "HDFC Bank"
+      ]
+    },
+    {
+      "symbol": "ICICIBANK.NS",
+      "name": "ICICI Bank Limited",
+      "aliases": [
+        "ICICI Bank"
+      ]
+    },
+    {
+      "symbol": "INFY.NS",
+      "name": "Infosys Limited",
+      "aliases": [
+        "Infosys",
+        "Infy"
+      ]
+    },
+    {
+      "symbol": "TCS.NS",
+      "name": "Tata Consultancy Services Limited",
+      "aliases": [
+        "TCS",
+        "Tata Consultancy"
+      ]
+    },
+    {
+      "symbol": "SBIN.NS",
+      "name": "State Bank of India",
+      "aliases": [
+        "SBI",
+        "State Bank of India"
+      ]
+    },
+    {
+      "symbol": "BHARTIARTL.NS",
+      "name": "Bharti Airtel Limited",
+      "aliases": [
+        "Bharti Airtel",
+        "Airtel"
+      ]
+    },
+    {
+      "symbol": "ITC.NS",
+      "name": "ITC Limited",
+      "aliases": [
+        "ITC"
+      ]
+    },
+    {
+      "symbol": "LT.NS",
+      "name": "Larsen & Toubro Limited",
+      "aliases": [
+        "Larsen & Toubro",
+        "L&T"
+      ]
+    },
+    {
+      "symbol": "HINDUNILVR.NS",
+      "name": "Hindustan Unilever Limited",
+      "aliases": [
+        "Hindustan Unilever",
+        "HUL"
+      ]
+    }
+  ],
+  "markets": [
+    "^NSEI",
+    "^BSESN",
+    "^NSEBANK",
+    "NIFTY_FIN_SERVICE.NS",
+    "^CNXIT",
+    "^NSEMDCP50",
+    "^INDIAVIX",
+    "INR=X",
+    "BZ=F",
+    "GC=F",
+    "^GSPC",
+    "^IXIC"
+  ],
+  "keywords": [
+    "RBI",
+    "repo rate",
+    "monetary policy",
+    "rate cut",
+    "rate hike",
+    "F&O",
+    "Union Budget"
+  ],
+  "muteKeywords": [
+    "box office",
+    "horoscope",
+    "lottery",
+    "gold rate today",
+    "silver rate today",
+    "gold price today",
+    "petrol price",
+    "diesel price",
+    "admit card",
+    "recruitment",
+    "prelims",
+    "answer key",
+    "exam date",
+    "syllabus"
+  ],
+  "alerts": {
+    "watchlistNews": true,
+    "keywordNews": true,
+    "filings": true,
+    "breakingMarket": true,
+    "minImpact": "any",
+    "bigMove": {
+      "enabled": true,
+      "pct": 3
+    },
+    "quietHours": {
+      "enabled": true,
+      "start": "22:30",
+      "end": "07:30"
+    },
+    "maxPerRun": 6
+  },
+  "priceAlerts": [],
+  "sources": {
+    "disabled": [],
+    "custom": []
+  },
+  "rev": 0
+}
